@@ -1,0 +1,464 @@
+---
+title: "Parcial I"
+author: "Alejandro Salazar Mejía"
+date: "24/4/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+### Lectura de Datos
+
+```{r}
+library(readr)
+library(MASS)
+library(hdrcde)
+library(knitr)
+source('~/Semestre 2021-1/R Programming/Estadística Bayesiana/Gráfico Histograma Decil.R')
+```
+
+
+```{r}
+numServiciosExp1 <- read_table2("~/Semestre 2021-1/R Programming/Estadística Bayesiana/Parcial I/numServiciosExp1.txt")
+numBarberosExp1 <- read_table2("~/Semestre 2021-1/R Programming/Estadística Bayesiana/Parcial I/numBarberosExp1.txt")
+precioServicioExp1 <- read_table2("~/Semestre 2021-1/R Programming/Estadística Bayesiana/Parcial I/precioServicioExp1.txt")
+
+```
+
+```{r}
+numServiciosExp2 <- read_table2("~/Semestre 2021-1/R Programming/Estadística Bayesiana/Parcial I/numServiciosExp2.txt")
+numBarberosExp2 <- read_table2("~/Semestre 2021-1/R Programming/Estadística Bayesiana/Parcial I/numBarberosExp2.txt")
+precioServicioExp2 <- read_table2("~/Semestre 2021-1/R Programming/Estadística Bayesiana/Parcial I/precioServicioExp2.txt")
+```
+
+```{r}
+numServiciosExp3 <- read_table2("~/Semestre 2021-1/R Programming/Estadística Bayesiana/Parcial I/numServiciosExp3.txt")
+numBarberosExp3 <- read_table2("~/Semestre 2021-1/R Programming/Estadística Bayesiana/Parcial I/numBarberosExp3.txt")
+precioServicioExp3 <- read_table2("~/Semestre 2021-1/R Programming/Estadística Bayesiana/Parcial I/precioServicioExp3.txt")
+```
+
+### Eli número de servicios
+
+```{r}
+a <- 30
+par(yaxt="n")
+# win.graph(12,7)
+plot(c(30,150),c(0,1),type="n",ylab="",xlab='Número de servicios',
+     main="Número de servicios a clientes en un mes\nsegún Experto 1", xaxt = "n")
+axis(1, at = seq(50, 150, 10))
+abline(v=seq(50, 150, 5),lty=2,col="grey")
+abline(h=0)
+abline(h=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1),lty=2,col="grey")
+legend(a,2/50,"Esto nunca pasaría!",cex=0.75,bg="white")
+legend(a,11.75/50,"No muy probable",cex=0.75,bg="white")
+legend(a,21.75/50,"Dudosamente",cex=0.75,bg="white")
+legend(a,31.75/50,"Algo posible",cex=0.75,bg="white")
+legend(a,41.75/50,"Es aceptable",cex=0.75,bg="white")
+legend(a,51.75/50,"Muy probable!",cex=0.75,bg="white")
+
+lines(numServiciosExp1$NumServicios, numServiciosExp1$Creencia, 
+      lwd = 3, col = "chocolate1", lty = 2)
+points(numServiciosExp1$NumServicios, numServiciosExp1$Creencia, 
+       col = "dodgerblue3", pch = 16, cex = 1.2)
+```
+
+```{r}
+a <- 55+20
+par(yaxt="n")
+#win.graph(12,7)
+plot(c(55+20,175+25+5),c(0,1),type="n",ylab="",xlab='Número de servicios',
+     main="Número de servicios a clientes en un mes\nsegún el Experto 2", 
+     xaxt= "n")
+axis(1, at = seq(75+25, 150+25+25, 10))
+abline(v=seq(50+25+25, 150+25+25+5, 5),lty=2,col="grey")
+abline(h=0)
+abline(h=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1),lty=2,col="grey")
+legend(a,2/50,"Esto nunca pasaría!",cex=0.75,bg="white")
+legend(a,11.75/50,"No muy probable",cex=0.75,bg="white")
+legend(a,21.75/50,"Dudosamente",cex=0.75,bg="white")
+legend(a,31.75/50,"Algo posible",cex=0.75,bg="white")
+legend(a,41.75/50,"Es aceptable",cex=0.75,bg="white")
+legend(a,51.75/50,"Muy probable!",cex=0.75,bg="white")
+
+lines(numServiciosExp2$NumServicios, numServiciosExp2$Creencia, 
+      lwd = 3, col = "chocolate1", lty = 2)
+points(numServiciosExp2$NumServicios, numServiciosExp2$Creencia, 
+       col = "dodgerblue3", pch = 16, cex = 1.2)
+```
+
+```{r}
+a <- 55+17
+par(yaxt="n")
+# win.graph(12,7)
+plot(c(55+20,175+25+10),c(0,1),type="n",ylab="",xlab='Número de servicios',
+     main="Número de servicios a clientes en un mes\nsegún el Experto 3", xaxt = "n")
+axis(1, at = seq(75+5, 150+25+25+15+10, 10))
+abline(v=seq(50+25+25-5, 150+25+25+10, 5),lty=2,col="grey")
+abline(h=0)
+abline(h=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1),lty=2,col="grey")
+legend(a,2/50,"Esto nunca pasaría!",cex=0.75,bg="white")
+legend(a,11.75/50,"No muy probable",cex=0.75,bg="white")
+legend(a,21.75/50,"Dudosamente",cex=0.75,bg="white")
+legend(a,31.75/50,"Algo posible",cex=0.75,bg="white")
+legend(a,41.75/50,"Es aceptable",cex=0.75,bg="white")
+legend(a,51.75/50,"Muy probable!",cex=0.75,bg="white")
+
+lines(numServiciosExp3$NumServicios, numServiciosExp3$Creencia, 
+      lwd = 3, col = "chocolate1", lty = 2)
+points(numServiciosExp3$NumServicios, numServiciosExp3$Creencia, 
+       col = "dodgerblue3", pch = 16, cex = 1.2)
+```
+
+
+### Eli número de barberos
+
+```{r}
+a <- 1050-200-800-100-100
+par(yaxt="n")
+# win.graph(12,7)
+plot(c(50,7000),c(0,1),type="n",ylab="",xlab='Número de barberos',
+     main="Número de barberos en Medellín\nsegún el Experto 1", xaxt = "n")
+axis(1, at = seq(1000, 7000, 500))
+abline(v=seq(1000, 7000, 250),lty=2,col="grey")
+abline(h=0)
+abline(h=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1),lty=2,col="grey")
+legend(a,2/50,"Esto nunca pasaría!",cex=0.75,bg="white")
+legend(a,11.75/50,"No muy probable",cex=0.75,bg="white")
+legend(a,21.75/50,"Dudosamente",cex=0.75,bg="white")
+legend(a,31.75/50,"Algo posible",cex=0.75,bg="white")
+legend(a,41.75/50,"Es aceptable",cex=0.75,bg="white")
+legend(a,51.75/50,"Muy probable!",cex=0.75,bg="white")
+
+lines(numBarberosExp1$NumBarberos, numBarberosExp1$Creencia, 
+      lwd = 3, col = "chocolate1", lty = 2)
+points(numBarberosExp1$NumBarberos, numBarberosExp1$Creencia, 
+       col = "dodgerblue3", pch = 16, cex = 1.2)
+```
+
+```{r}
+a <- 1050-200-800-100-50
+par(yaxt="n")
+# win.graph(12,7)
+plot(c(100,8000),c(0,1),type="n",ylab="",xlab='Número de barberos',
+     main="Número de barberos en Medellín\nsegún el Experto 2", xaxt = "n")
+axis(1, at = seq(1000, 8000, 500))
+abline(v=seq(1250, 8000, 250),lty=2,col="grey")
+abline(h=0)
+abline(h=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1),lty=2,col="grey")
+legend(a,2/50,"Esto nunca pasaría!",cex=0.75,bg="white")
+legend(a,11.75/50,"No muy probable",cex=0.75,bg="white")
+legend(a,21.75/50,"Dudosamente",cex=0.75,bg="white")
+legend(a,31.75/50,"Algo posible",cex=0.75,bg="white")
+legend(a,41.75/50,"Es aceptable",cex=0.75,bg="white")
+legend(a,51.75/50,"Muy probable!",cex=0.75,bg="white")
+
+lines(numBarberosExp2$NumBarberos, numBarberosExp2$Creencia, 
+      lwd = 3, col = "chocolate1", lty = 2)
+points(numBarberosExp2$NumBarberos, numBarberosExp2$Creencia, 
+       col = "dodgerblue3", pch = 16, cex = 1.2)
+```
+
+```{r}
+a <- 1050-200-800-100-50
+par(yaxt="n")
+# win.graph(12,7)
+plot(c(100,8000),c(0,1),type="n",ylab="",xlab='Número de barberos',
+     main="Número de barberos en Medellín\nsegún el Experto 3", xaxt = "n")
+axis(1, at = seq(1000, 8000, 500))
+abline(v=seq(1250, 8000, 250),lty=2,col="grey")
+abline(h=0)
+abline(h=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1),lty=2,col="grey")
+legend(a,2/50,"Esto nunca pasaría!",cex=0.75,bg="white")
+legend(a,11.75/50,"No muy probable",cex=0.75,bg="white")
+legend(a,21.75/50,"Dudosamente",cex=0.75,bg="white")
+legend(a,31.75/50,"Algo posible",cex=0.75,bg="white")
+legend(a,41.75/50,"Es aceptable",cex=0.75,bg="white")
+legend(a,51.75/50,"Muy probable!",cex=0.75,bg="white")
+
+lines(numBarberosExp3$NumBarberos, numBarberosExp3$Creencia, 
+      lwd = 3, col = "chocolate1", lty = 2)
+points(numBarberosExp3$NumBarberos, numBarberosExp3$Creencia, 
+       col = "dodgerblue3", pch = 16, cex = 1.2)
+```
+
+
+### Eli precio por servicios
+
+```{r}
+precioServicioExp1$Creencia <- ceiling(precioServicioExp1$Creencia)
+hist(rep(precioServicioExp1$Precios, precioServicioExp1$Creencia),
+     breaks = seq(2000,35000, 3000), xaxt = 'n',
+     main="Número de servicios al mes dentro de un rango de precios
+     \nsegún el Experto 1 ", 
+     xlab = "Precios de los servicios",
+     ylab = "Frecuencia de servicios")
+axis(1,at = seq(2000,35000, 3000))
+
+```
+
+```{r}
+hist(rep(precioServicioExp2$Precios, precioServicioExp2$Creencia),
+     breaks = seq(2000,29000, 3000), xaxt = 'n',
+     main="Número de servicios al mes dentro de un rango de precios
+     \nsegún el Experto 2 ", 
+     xlab = "Precios de los servicios",
+     ylab = "Frecuencia de servicios")
+axis(1,at = seq(2000,29000, 3000))
+
+```
+
+```{r}
+hist(rep(precioServicioExp3$Precios, precioServicioExp3$Creencia),
+     breaks = seq(2000,21000, 3000), xaxt = 'n', 
+     main="Número de servicios al mes dentro de un rango de precios
+     \nsegún el Experto 3 ", 
+     xlab = "Precios de los servicios ($)",
+     ylab = "Frecuencia de servicios")
+axis(1,at = seq(2000,21000, 3000))
+```
+
+
+## Unificación número de servicios a clientes
+
+```{r}
+muestraNumServExp1 <- sample(numServiciosExp1$NumServicios, 10000,
+                             replace = T, prob = numServiciosExp1$Creencia)
+muestraNumServExp2 <- sample(numServiciosExp2$NumServicios, 8000,
+                             replace = T, prob = numServiciosExp2$Creencia)
+muestraNumServExp3 <- sample(numServiciosExp3$NumServicios, 8000,
+                             replace = T, prob = numServiciosExp3$Creencia)
+
+res11 <- prop.table(numServiciosExp1$Creencia)
+res12 <- prop.table(numServiciosExp2$Creencia)
+res13 <- prop.table(numServiciosExp3$Creencia)
+
+res14 <- prop.table( table( c(muestraNumServExp1, muestraNumServExp2,
+                              muestraNumServExp3) ) )
+
+plot(seq(70,130,5), xlim = c(70,210),res11, type='b',ylab='Densidad',xlab='Número de servicios a Clientes')
+title(main='Número de Servicios a Clientes en un mes')
+points(seq(100,205,5), res12, type='b',col='blue')
+points(seq(95,210,5), res13, type='b',col='green')
+
+points(res14, type='b',col='red')
+
+legend(160,0.17,c('Experto 1','Experto 2', 'Experto 3','Promedio'),lty=c(1,1,1,1),
+       col=c('black','blue','green','red'))
+```
+
+```{r}
+Nsim1 <- 10000
+n.seg1 <- 13 # Según tabla de la diapositiva 10 de la clase3 
+
+datos1 <- data.frame(res14)
+
+muestras1 <- sample(as.numeric(dimnames(res14)[[1]]), Nsim1*n.seg1, replace = T, 
+                    prob = datos1$Freq)
+matriz1 <- matrix(muestras1, ncol = n.seg1)
+medias1 <- apply(matriz1, 1, mean)
+hist(medias1, freq = F, ylim = c(0,0.045),
+main = "Distribución del número promedio de servicios a clientes\nen un mes de los barberos en Medellín", xlab = "Número promedio de servicios ", ylab = "Densidad")
+
+paras1 <- fitdistr(medias1, "normal")$estimate
+lines(xx<-seq(min(medias1),max(medias1),length=100),
+       dnorm(xx,mean=paras1[1],sd=paras1[2] ))
+```
+
+```{r}
+histo.decil(medias1) # x = Ingreso en millones de pesos
+boxplot(medias1, main = "Distribución del número promedio de servicios a clientes\nen un mes de los barberos en Medellín", xlab = "Número promedio de servicios ", 
+        horizontal = T)
+```
+
+```{r}
+hdrNumSer <- hdr.den(medias1,  main = "Distribución del número promedio de servicios a clientes\nen un mes de los barberos en Medellín", xlab = "Número promedio de servicios ", ylab = "Densidad")
+kable(hdrNumSer$hdr, col.names = c("Límite inferior", "Límite superior"))
+```
+
+```{r}
+a <- summary(medias1)
+kable(t(as.list(a)), col.names = names(a) )
+aa <- round(quantile(medias1,probs=c(0.05,1:9/10,0.95)))
+kable(t(as.list(aa)), col.names = names(aa) )
+
+
+kable( t( as.list( c(sd(medias1), IQR(medias1), hdrNumSer$mode ) ) ), 
+       col.names = c("Desviación Estándar","Rango Intercuartil", "Moda") )
+```
+
+
+
+## Unificación número de barberos en Medellín
+
+```{r}
+muestraNumBarExp1 <- sample(numBarberosExp1$NumBarberos, 5000,
+                             replace = T, prob = numBarberosExp1$Creencia)
+muestraNumBarExp2 <- sample(numBarberosExp2$NumBarberos, 8000,
+                             replace = T, prob = numBarberosExp2$Creencia)
+muestraNumBarExp3 <- sample(numBarberosExp3$NumBarberos, 8000,
+                             replace = T, prob = numBarberosExp3$Creencia)
+
+res21 <- prop.table(numBarberosExp1$Creencia)
+res22 <- prop.table(numBarberosExp2$Creencia)
+res23 <- prop.table(numBarberosExp3$Creencia)
+
+res24 <- prop.table( table( c(muestraNumBarExp1, muestraNumBarExp2,
+                              muestraNumBarExp3) ) )
+
+plot(numBarberosExp1$NumBarberos, xlim = c(1000,9000),res21, type='b',ylab='Densidad',xlab='Número de barberos')
+title(main='Creencia del número de Barberos en la ciudad de Medellín')
+points(numBarberosExp2$NumBarberos, res22, type='b',col='blue')
+points(numBarberosExp3$NumBarberos, res23, type='b',col='green')
+
+points(res24, type='b',col='red')
+
+legend(7200,0.08,c('Experto 1','Experto 2', 'Experto 3','Promedio'),lty=c(1,1,1,1),
+       col=c('black','blue','green','red'))
+```
+```{r}
+muestras2 <- sample(as.numeric(dimnames(res24)[[1]]), 10000, replace = T, 
+                    prob = res24)
+
+a <- summary(muestras2)
+kable(t(as.list(a)), col.names = names(a) )
+aa <- round(quantile(muestras2,probs=c(0.05,1:9/10,0.95)))
+kable(t(as.list(aa)), col.names = names(aa) )
+df24 <- as.data.frame(res24)
+aaa <-  as.vector(df24[ df24[,2] == max( df24[,2] ), ])
+kable( t( as.list( c(sd(muestras2), IQR(muestras2), as.character(aaa$Var1) ) ) ), 
+       col.names = c("Desviación Estándar","Rango Intercuartil", "Moda") )
+
+```
+
+
+
+## Unificación precio por servicios a clientes en un mes
+
+```{r}
+muestraPrecServExp1 <- sample(precioServicioExp1$Precios, 10000,
+                             replace = T, prob = precioServicioExp1$Creencia)
+muestraPrecServExp2 <- sample(precioServicioExp2$Precios, 8000,
+                             replace = T, prob = precioServicioExp2$Creencia)
+muestraPrecServExp3 <- sample(precioServicioExp3$Precios, 8000,
+                             replace = T, prob = precioServicioExp3$Creencia)
+
+res31 <- prop.table(precioServicioExp1$Creencia)
+res32 <- prop.table(precioServicioExp2$Creencia)
+res33 <- prop.table(precioServicioExp3$Creencia)
+
+res34 <- prop.table( table( c(muestraPrecServExp1, muestraPrecServExp2,
+                              muestraPrecServExp3) ) )
+
+plot(precioServicioExp1$Precios, xaxt = 'n',res31, type='b',ylab='Densidad',xlab='Precio de servicio ($)')
+axis(1, at = seq(3500, 33500, 3000))
+title(main='Proporción de ingresos por Servicio a Clientes')
+points(precioServicioExp2$Precios, res32, type='b',col='blue')
+points(precioServicioExp3$Precios, res33, type='b',col='green')
+
+points(res34, type='b',col='red')
+
+legend(24500,0.5,c('Experto 1','Experto 2', 'Experto 3','Promedio'),lty=c(1,1,1,1),
+       col=c('black','blue','green','red'))
+
+```
+
+```{r}
+Nsim3 <- 10000
+n.seg3 <- 13 # Según tabla de la diapositiva 10 de la clase3 
+
+muestras3 <- sample(as.numeric(dimnames(res34)[[1]]), Nsim3*n.seg3, replace = T, 
+                    prob = res34)
+matriz3 <- matrix(muestras3, ncol = n.seg3)
+medias3 <- apply(matriz3, 1, mean)
+hist(medias3, freq = F,
+main = "Distribución del ingreso promedio por servicio\nde los barberos en Medellín", xlab = "Número promedio del ingreso ($)", ylab = "Densidad")
+
+paras3 <- fitdistr(medias3, "normal")$estimate
+lines(xx<-seq(min(medias3),max(medias3),length=100),
+       dnorm(xx,mean=paras3[1],sd=paras3[2] ))
+```
+
+```{r}
+histo.decil(medias3) # x = Ingreso en millones de pesos
+boxplot(medias3, main = "Distribución del ingreso promedio por servicio\nde los barberos en Medellín", xlab = "Número promedio del ingreso ($)",
+        horizontal = T)
+```
+
+```{r}
+hdrIngSer<- hdr.den(medias3,  main = "Distribución del ingreso promedio por servicio\nde los barberos en Medellín", xlab = "Número promedio del ingreso ($)", ylab = "Densidad")
+kable(hdrIngSer$hdr, col.names = c("Límite inferior", "Límite superior"))
+```
+
+```{r}
+a <- summary(medias3)
+kable(t(as.list(a)), col.names = names(a) )
+aa <- round(quantile(medias3,probs=c(0.05,1:9/10,0.95)))
+kable(t(as.list(aa)), col.names = names(aa) )
+
+
+kable( t( as.list( c(sd(medias3), IQR(medias3), hdrIngSer$mode ) ) ), 
+       col.names = c("Desviación Estándar","Rango Intercuartil", "Moda") )
+```
+
+
+
+## Ingreso total del rector por mes
+
+```{r}
+total <- medias1*muestras2*medias3
+total2 <- total/1000000
+
+hist(total2, freq = F, main = "Distribución del ingreso total del sector de los barberos\n por mes en Medellín", xlab = "Ingreso en millones de pesos", ylab = "Densidad", ylim = c(0,0.00013))
+
+s <- log(mean(total2))- mean(log(total2))
+k <- (3 - s + sqrt( (s-3)^2 + 24*s ) )/(12*s)
+theta <- mean(total2)/k
+
+lines(xxx <- seq(min(total2), max(total2), len = 1000), dgamma(xxx, shape = k, scale = theta))
+
+k <- mean(total2)^2 / var(total2)
+theta <- var(total2)/mean(total2)
+lines(xxx <- seq(min(total2), max(total2), len = 1000), dgamma(xxx, shape = k, 
+                                                               scale = theta),
+      lty = 2)
+
+mu <- mean(log(total2))
+sigma <- sd(log(total2))
+lines(xxx <- seq(min(total2), max(total2), len = 1000), dlnorm(xxx, mu, sigma), lty = 3)
+
+lines(density(total2, bw = 1000), lwd = 2)
+
+legend(15000,0.00012,c('Gamma por MM','Gamma por MLE', 'Log-normal','No-paramétrica'),
+       lty=c(1,2,3,1), lwd = c(1, 1, 1, 2), col = rep("black", 4))
+
+```
+```{r}
+histo.decil(total2) # x = Ingreso en millones de pesos
+boxplot(total2, main = "Distribución del ingreso total del sector de los barberos\n por mes en Medellín", xlab = "Ingreso en millones de pesos", horizontal = T)
+```
+
+```{r}
+hdrTotal<- hdr.den(total, h = 7e8,  main = "Distribución del ingreso total del sector de los barberos\n por mes en Medellín", xlab = "Ingreso pesos ($)", ylab = "Densidad")
+kable(hdrTotal$hdr, col.names = c("Límite inferior", "Límite superior"))
+```
+
+```{r}
+a <- summary(total)
+kable(t(as.list(a)), col.names = names(a) )
+aa <- round(quantile(total,probs=c(0.05,1:5/10)))
+aaa <- round(quantile(total,probs=c(6:9/10,0.95)))
+kable(t(as.list(aa)), col.names = names(aa) )
+kable(t(as.list(aaa)), col.names = names(aaa) )
+
+
+kable( t( as.list( c(sd(total), IQR(total), hdrTotal$mode ) ) ), 
+       col.names = c("Desviación Estándar","Rango Intercuartil", "Moda") )
+
+```
+
+```{r}
+hdr.boxplot.2d(medias1, medias3, xlab = "Número promedio de servicios al mes",
+               ylab = "Ingreso promedio por servicio",
+               main = "Distribución conjunta del\nNúmero promedio de servicios al mes y\nIngreso promedio por servicio")
+```
+
