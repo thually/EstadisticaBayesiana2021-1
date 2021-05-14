@@ -3,5 +3,5 @@ En este repositorio se encuentra el código en Rmarkdown y los datos de las elic
   
 Hecho por:  
 
-* Juan Pablo Mart ́ınez Echavarría  
+* Juan Pablo Martínez Echavarría  
 * Alejandro Salazar Mejía
