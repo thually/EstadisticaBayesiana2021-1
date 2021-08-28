@@ -1,0 +1,498 @@
+---
+title: "Parcial II"
+author: "Alejandro Salazar Mejía"
+date: "23/8/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+library('MCMCpack')
+library(hdrcde)
+library(KernSmooth)
+library(knitr)
+library(readr)
+library(plotrix)
+library(HH)
+
+source('funcionesAux.R')
+```
+
+Como se explicó en la sección 3.1, la métodología de elicitación consiste básicamente en elegir al menos dos puntos de diseño, y elicitar la distribución normal de la respuesta en dichos puntos. En esta sección se muestra dicho proceso.  
+
+Se escogieron tres puntos de diseño: los modelos 2013, 2015 y 2017. Una vez obtenidos los intervalos en cada año y la frencuencia de la muestra hipotéticas en estos, se hace uso de la función estimaNormal, programada por el profesor Juan Carlos Correa Morales y presentada en el curso de estadística bayesiana en las diapositivas de la clase 10. Esta función nos permite encontrar una distribución normal que mejor ajuste sus probabilidades a las frecuencias relativas correspondientes a cada subintervalo por medio de un proceso de optimización.  
+
+A continuación se muestra de manera gráfica el resultado de la elicitación del precio del auto en cada año-modelo, junto con la distribución normal ajustada y su tabla de parámetros estimados.
+
+### 2013: 
+```{r}
+limites2013 <- c(25, 26, 27, 28, 29, 30)
+frecus2013 <- c(20, 40, 80, 100, 100)
+```
+```{r}
+(resu2013 <- optim(c(26,5),estimaNormal,method='L-BFGS-B',
+             lower=c(25,0.01),upper=c(28,50),
+             limites=limites2013 ,frecu=frecus2013))
+param.opt2013<-resu2013$par
+```
+```{r}
+histograma(frecus2013,limites2013, 
+           main = "Distribución del precio \nen Millones de pesos del modelo 2013", 
+           xlab = "Millones de pesos ($)", 
+           ylab = "Densidad")
+points(xx<-seq(min(limites2013)-1,max(limites2013)+2,length=100),
+       dnorm(xx,mean=param.opt2013[1],sd=sqrt(param.opt2013[2])),type='l')
+```
+```{r}
+kable(t(param.opt2013), 
+      col.names = c("$\\mu_{2013}$", "$\\sigma^2_{2013}$"),
+      caption = "Parámetros de la distribución en el año-modelo 2013")
+```
+
+
+### 2015:
+```{r}
+limites2015 <- c(30, 31, 32,33)
+frecus2015 <- c(20, 50, 50)
+```
+```{r}
+(resu2015 <- optim(c(30,5),estimaNormal,method='L-BFGS-B',
+             lower=c(29,0.02),upper=c(32,50),
+             limites=limites2015 ,frecu=frecus2015))
+param.opt2015<-resu2015$par
+```
+```{r}
+histograma(frecus2015,limites2015, 
+           main = "Distribución del precio \nen Millones de pesos del modelo 2015", 
+           xlab = "Millones de pesos ($)", 
+           ylab = "Densidad")
+points(xx<-seq(min(limites2015)-1,max(limites2015)+1.5,length=100),
+       dnorm(xx,mean=param.opt2015[1],sd=sqrt(param.opt2015[2])),type='l')
+```
+
+```{r}
+kable(t(param.opt2015), 
+      col.names = c("$\\mu_{2015}$", "$\\sigma^2_{2015}$"),
+      caption = "Parámetros de la distribución en el año-modelo 2015")
+```
+
+
+### 2017:
+```{r}
+limites2017 <- c(35, 36, 37, 38)
+frecus2017 <- c(20, 30, 50)
+```
+```{r}
+(resu2017 <- optim(c(36,5),estimaNormal,method='L-BFGS-B',
+             lower=c(35,0.01),upper=c(38,50),
+             limites=limites2017 ,frecu=frecus2017))
+param.opt2017<-resu2017$par
+```
+```{r}
+histograma(frecus2017,limites2017, 
+           main = "Distribución del precio \nen Millones de pesos del modelo 2017", 
+           xlab = "Millones de pesos ($)", 
+           ylab = "Densidad")
+points(xx<-seq(min(limites2017),max(limites2017)+1.5,length=100),
+       dnorm(xx,mean=param.opt2017[1],sd=sqrt(param.opt2017[2])),type='l')
+```
+
+```{r}
+kable(t(param.opt2017), 
+      col.names = c("$\\mu_{2017}$", "$\\sigma^2_{2017}$"),
+      caption = "Parámetros de la distribución en el año-modelo 2017")
+```
+
+
+Una vez obtenidas las tres normales, se simularon 20 datos de cada una (este número busca reflejar el conocimiento que tiene el experto sobre el tema el cual es alto). A dicha muestra se le ajustó un modelo de regresión lineal simple y se guardaron los valores de los tres parámetros de interés. Este proceso se repitió 1000 veces, lo que resulta en una muestra simulada de tamaño 1000 de $\beta_0$, $\beta_1$ y $\sigma^2$.  
+
+
+### Apriori:
+```{r}
+betas0 <- c()
+betas1 <- c()
+sigmas2 <- c()
+
+x <- rep(c(13,15,17), each= 20)
+
+for (i in 1:1000) {
+    y2013 <- rnorm(20, mean = param.opt2013[1], sd = param.opt2013[2])
+    y2015 <- rnorm(20, mean = param.opt2015[1], sd = param.opt2015[2])
+    y2017 <- rnorm(20, mean = param.opt2017[1], sd = param.opt2017[2])
+    y <- c(y2013, y2015, y2017)
+    modelo <- lm(y~x)
+    
+    betas0 <- c(betas0, modelo$coefficients[1])
+    betas1 <- c(betas1, modelo$coefficients[2])
+    sigmas2 <- c(sigmas2, (summary(modelo)$sigma)**2)
+}
+
+taus <- 1/sigmas2
+```
+```{r}
+# Estimación de parás. de normal bivariada de Beta0 y Beta1
+betas <- data.frame(betas0, betas1)
+b0 <- colMeans(betas)
+B0 <- solve(var(betas))
+
+# Estimación de parás. de Gamma inversa por MM 
+m <- mean(sigmas2)
+v <- var(sigmas2)
+alpha <- m^2/v+2
+beta <- m*(m^2/v+1)
+```
+
+Se busca contruir una distribución apriori con la siguiente p.d.f:
+$$\xi(\beta_0,\beta_1,\sigma^2) = \mathcal{N}(\beta_0,\beta_1) \times \mathcal{G.I(\sigma^2)}$$
+
+Para esto, vamos a aproximar la distribución apriori del experto al modelo teórico anterior. Se estima entonces el vector de medias y la matriz de var-cov de $\mathcal{N}(\beta_0,\beta_1)$, y los parámetros de escala y forma para $\mathcal{G.I(\sigma^2)}$ usando el método de los momentos.  
+
+A continuación se muestra de manera gráfica las distribuciones de $\beta_0,\beta_1,$ y $\sigma^2$, y su tabla de parámetros estimados necesarios para ajustar el modelo teórico.
+
+```{r}
+# Distribución Bivariada de beta0 y beta1
+hdr.boxplot.2d(betas0, betas1, 
+               main = expression("Distribución conjunta de "~beta[0]~y~beta[1]),
+               xlab = expression(beta[0]),
+               ylab = expression(beta[1]))
+```
+```{r}
+est <- bkde2D(betas, bandwidth = c(0.5,0.5))
+persp(est$fhat, 
+      phi = 40, theta = 40, axes = F,
+      main = expression("Distribución conjunta de "~beta[0]~y~beta[1]))
+```
+
+
+```{r}
+hdrBeta0 <- hdr.den(betas0, xlab = expression(beta[0]), 
+                    ylab = "Densidad",
+                    main = expression("Distribución Marginal de "~beta[0]))
+```
+
+```{r}
+hdrBeta1 <- hdr.den(betas1, xlab = expression(beta[1]), 
+                    ylab = "Densidad",
+                    main = expression("Distribución Marginal de "~beta[1]))
+```
+
+```{r}
+kable(t(b0), 
+      col.names = c("$\\mu_{\\beta_{0}}$", "$\\mu_{\\beta_{1}}$"),
+      caption = "Vector de Medias")
+
+rownames(B0) <- c("$\\beta_0$", "$\\beta_1$")
+
+kable(B0, 
+      col.names = c("$\\beta_0$", "$\\beta_1$"), 
+      caption = "Matriz de var-cov")
+```
+
+
+```{r}
+hdrSigma2 <- hdr.den(sigmas2, xlab = expression(sigma^2), 
+                    ylab = "Densidad",
+                    main = expression("Distribución de "~sigma^2))
+```
+
+```{r}
+xxx <- seq(from = min(sigmas2), to = max(sigmas2), length.out = 1000)
+hist(sigmas2, freq = F, ylim = c(0, 1.2),
+     xlab = expression(sigma^2),
+     ylab = "Densidad",
+     main = expression("Distribución de "~sigma^2))
+lines(xxx, invGamma(alpha, beta, xxx))
+legend("topright",legend="Gamma Inversa",col=1,lwd=1)
+```
+
+
+```{r}
+kable(t(c(alpha, beta)), 
+      col.names = c("Forma", "Escala"),
+      caption = "Parámetros de G.I")
+```
+
+
+### Datos Muestrales:
+Obtenidos de:
+https://carros.tucarro.com.co/  
+https://carros.mercadolibre.com.co/  
+https://www.olx.com.co/  
+
+En particular se buscaron autos cuyo modelo concordaran con los puntos de diseño escogidos, de forma que, más adelante, podamos comparar la información del experto con la muestral.
+
+```{r}
+DatosCarros <- read_csv("DatosCarros.csv", col_names = c("modeloAuto", "precio"))
+DatosCarros$modeloAuto <- as.numeric(sub("20","",as.character(DatosCarros$modeloAuto)))
+attach(DatosCarros)
+```
+
+```{r}
+# Table <- data.frame(round(matrix(c(summary(precio),sd(precio)),ncol=7),2))
+# names(Table)=c(names(summary(precio)),"sd")
+# win.graph(width = 10)
+# layout(rbind(c(1,1),c(2,3)),heights=c(1,3))
+# plot.new()
+# addtable2plot(x="top",table=Table, xpad=1, ypad=1, bty='o',
+#               display.rownames = F, hlines = TRUE, vlines = TRUE,
+#               title = "Estadísticos de resumen")
+# 
+# den <- density(precio)
+# hist(precio,breaks="FD",freq=F,xlim=c(min(den$x),max(den$x)),
+#      main = paste("Histograma del precio en Millones de pesos"),
+#      xlab="Millones de pesos ($)",col="white")
+# lines(den,col=2,lwd=2)
+# boxplot(precio,boxwex=0.4,xlab="Precio en Millones ($)",
+#         col="white")
+```
+
+```{r}
+kable(table(modeloAuto))
+```
+
+
+```{r}
+plot(modeloAuto, precio,
+     main="Gráfico de Dispersión",
+     xlab="año-modelo del vehículo",ylab="Precio en millones ($)",cex=1.5,bty="n",
+     font=3,font.main=4)
+lines(loess.smooth(modeloAuto, precio,family="gaussian",span=0.8),
+lty=1,lwd=2,col="red")
+legend("topleft",legend="Curva de ajuste LOESS",col=2,lwd=2)
+```
+
+```{r}
+modeloVero <- lm(precio~modeloAuto)
+anovaModeloVero <- data.frame(anova(modeloVero))
+anovaModeloVero[2,c(4,5)] <- c("", "")
+kable(anovaModeloVero)
+estimaciones <- rbind(summary(modeloVero)$coefficients,
+                      sigma2=summary(modeloVero)$sigma**2)
+rownames(estimaciones) <- c("$\\beta_0$","$\\beta_1$", "$\\sigma^2$")
+kable(estimaciones)
+```
+
+```{r}
+test <- shapiro.test(residuals(modeloVero))
+qqnorm(residuals(modeloVero),cex=1.5,bty="n",font=3,font.main=3)
+qqline(residuals(modeloVero),lty=1,lwd=2,col=2)
+legend("topleft",legend=rbind(c("Statistic W","p.value"),
+                              round(c(test$statistic,test$p.value),digits=4)),cex=0.8)
+```
+
+```{r}
+# win.graph(width=8,height=6)
+ci.plot(modeloVero,xlab="Año-modelo",ylab="Precio en millones($)",
+        lty=c(2,1,3), cex=1.5,conf.level=.95)
+```
+
+### Datos Muestrales vs. Experto
+
+#### 2013
+```{r}
+#win.graph()
+par(mfrow = c(1,2))
+datos2013 <- precio[modeloAuto == 13]
+hist(datos2013, breaks = 22:32, freq = F,
+     xlab = "Millones de pesos ($)", 
+     ylab = "Densidad", main = NA)
+box()
+histograma(frecus2013,limites2013, 
+           xlab = "Millones de pesos ($)", 
+           ylab = "Densidad")
+title("Datos precios vs. elicitación: 2013", line = -1, outer = T)
+```
+
+```{r}
+xxx <- seq(22,36, length.out = 1000)
+plot(xxx, dnorm(xxx, param.opt2013[1], param.opt2013[2]), type = "l", col = "blue",
+     main = "Distribución del precio según experto y datos del modelo 2013",
+     xlab = "precio del auto (millones de COP)",
+     ylab = "Densidad")
+points(xxx, dnorm(xxx, mean(datos2013), sd(datos2013)), type = "l", col = "red")
+legend("topleft",legend=c("Experto", "Datos"),col=c("blue", "red"), lty = 1)
+abline(v = param.opt2013[1], lty = 2, col = "grey")
+abline(v = mean(datos2013), lty = 2, col = "grey")
+```
+
+
+#### 2015
+```{r}
+#win.graph()
+par(mfrow = c(1,2))
+datos2015 <- precio[modeloAuto == 15]
+hist(datos2015, breaks = 30:40,freq = F,
+     xlab = "Millones de pesos ($)", 
+     ylab = "Densidad", main = NA)
+box()
+histograma(frecus2015,limites2015, 
+           xlab = "Millones de pesos ($)", 
+           ylab = "Densidad")
+title("Datos precios vs. elicitación: 2015", line = -1, outer = T)
+```
+
+```{r}
+xxx <- seq(29,42, length.out = 1000)
+plot(xxx, dnorm(xxx, param.opt2015[1], param.opt2015[2]), type = "l", col = "blue",
+     main = "Distribución del precio según experto y datos del modelo 2015",
+     xlab = "precio del auto (millones de COP)",
+     ylab = "Densidad")
+points(xxx, dnorm(xxx, mean(datos2015), sd(datos2015)), type = "l", col = "red")
+legend("topright",legend=c("Experto", "Datos"),col=c("blue", "red"), lty = 1)
+abline(v = param.opt2015[1], lty = 2, col = "grey")
+abline(v = mean(datos2015), lty = 2, col = "grey")
+```
+
+
+#### 2017
+```{r}
+#win.graph()
+par(mfrow = c(1,2))
+datos2017 <- precio[modeloAuto == 17]
+hist(datos2017,freq = F, breaks = 37:45,
+     xlab = "Millones de pesos ($)", 
+     ylab = "Densidad", main = NA)
+box()
+histograma(frecus2017,limites2017, 
+           xlab = "Millones de pesos ($)", 
+           ylab = "Densidad")
+title("Datos precios vs. elicitación: 2017", line = -1, outer = T)
+```
+
+```{r}
+xxx <- seq(34,47, length.out = 1000)
+plot(xxx, dnorm(xxx, param.opt2017[1], param.opt2017[2]), type = "l", col = "blue",
+     main = "Distribución del precio según experto y datos del modelo 2017",
+     xlab = "precio del auto (millones de COP)",
+     ylab = "Densidad")
+points(xxx, dnorm(xxx, mean(datos2017), sd(datos2017)), type = "l", col = "red")
+legend("topright",legend=c("Experto", "Datos"),col=c("blue", "red"), lty = 1)
+abline(v = param.opt2017[1], lty = 2, col = "grey")
+abline(v = mean(datos2017), lty = 2, col = "grey")
+```
+
+
+### Posterior
+
+```{r}
+resPoste <- MCMCregress(precio ~ modeloAuto, 
+                        b0 = b0, B0 = round(B0,3), 
+                        sigma.mu = mean(sigmas2), sigma.var = var(sigmas2))
+```
+```{r}
+suPoste <- summary(resPoste)
+kable(suPoste$statistics, col.names = colnames(suPoste$statistics))
+kable(suPoste$quantiles, col.names = colnames(suPoste$quantiles))
+```
+```{r}
+plot(resPoste)
+```
+
+```{r}
+cor(resPoste)
+```
+
+
+## Precio del modelo 2013
+
+### Distribución del precio medio del modelo 2013
+
+```{r}
+preciosMedios2013 <- resPoste[,1] + resPoste[,2] * 13
+```
+```{r}
+hdrPreciosMedios2013 <- hdr.den(preciosMedios2013, xlab = "Millones de COP", 
+                    ylab = "Densidad",
+                    main = expression("Distribución del precio medio del modelo 2013"))
+```
+```{r}
+suM2013 <- summary(preciosMedios2013)
+kable(suM2013$statistics, col.names = colnames(suM2013$statistics))
+kable(suM2013$quantiles, col.names = colnames(suM2013$quantiles))
+```
+
+
+###  Distribución predictiva del precio del modelo 2013
+```{r}
+errores <- sapply(resPoste[,3], genera.error)
+preciosPredic2013 <- preciosMedios2013 + errores
+```
+```{r}
+hdrPreciosPredic2013 <- hdr.den(preciosPredic2013, xlab = "Millones de COP", 
+                    ylab = "Densidad",
+                    main = expression("Distribución predictiva del precio del modelo 2013"))
+```
+```{r}
+suP2013 <- summary(preciosPredic2013)
+kable(suP2013$statistics, col.names = colnames(suP2013$statistics))
+kable(suP2013$quantiles, col.names = colnames(suP2013$quantiles))
+```
+
+## Precio del modelo 2015
+
+### Distribución del precio medio del modelo 2015
+
+```{r}
+preciosMedios2015 <- resPoste[,1] + resPoste[,2] * 15
+```
+```{r}
+hdrPreciosMedios2015 <- hdr.den(preciosMedios2015, xlab = "Millones de COP", 
+                    ylab = "Densidad",
+                    main = expression("Distribución del precio medio del modelo 2015"))
+```
+```{r}
+suM2015 <- summary(preciosMedios2015)
+kable(suM2015$statistics, col.names = colnames(suM2015$statistics))
+kable(suM2015$quantiles, col.names = colnames(suM2015$quantiles))
+```
+
+
+###  Distribución predictiva del precio del modelo 2015
+```{r}
+preciosPredic2015 <- preciosMedios2015 + errores
+```
+```{r}
+hdrPreciosPredic2015 <- hdr.den(preciosPredic2015, xlab = "Millones de COP", 
+                    ylab = "Densidad",
+                    main = expression("Distribución predictiva del precio del modelo 2015"))
+```
+```{r}
+suP2015 <- summary(preciosPredic2015)
+kable(suP2015$statistics, col.names = colnames(suP2015$statistics))
+kable(suP2015$quantiles, col.names = colnames(suP2015$quantiles))
+```
+
+## Precio del modelo 2017
+
+### Distribución del precio medio del modelo 2017
+
+```{r}
+preciosMedios2017 <- resPoste[,1] + resPoste[,2] * 17
+```
+```{r}
+hdrPreciosMedios2017 <- hdr.den(preciosMedios2017, xlab = "Millones de COP", 
+                    ylab = "Densidad",
+                    main = expression("Distribución del precio medio del modelo 2017"))
+```
+```{r}
+suM2017 <- summary(preciosMedios2017)
+kable(suM2017$statistics, col.names = colnames(suM2017$statistics))
+kable(suM2017$quantiles, col.names = colnames(suM2017$quantiles))
+```
+
+
+###  Distribución predictiva del precio del modelo 2017
+```{r}
+preciosPredic2017 <- preciosMedios2017 + errores
+```
+```{r}
+hdrPreciosPredic2017 <- hdr.den(preciosPredic2017, xlab = "Millones de COP", 
+                    ylab = "Densidad",
+                    main = expression("Distribución predictiva del precio del modelo 2017"))
+```
+```{r}
+suP2017 <- summary(preciosPredic2017)
+kable(suP2017$statistics, col.names = colnames(suP2017$statistics))
+kable(suP2017$quantiles, col.names = colnames(suP2017$quantiles))
+```
