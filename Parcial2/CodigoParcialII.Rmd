@@ -382,10 +382,15 @@ resPoste <- MCMCregress(precio ~ modeloAuto,
 ```
 ```{r}
 suPoste <- summary(resPoste)
-kable(suPoste$statistics, col.names = colnames(suPoste$statistics))
-kable(suPoste$quantiles, col.names = colnames(suPoste$quantiles))
+aux1 <- suPoste$statistics
+rownames(aux1) <- c("$\\beta_0$","$\\beta_1$", "$\\sigma^2$")
+kable(aux1, col.names = colnames(suPoste$statistics))
+aux2 <- suPoste$quantiles
+rownames(aux2) <- c("$\\beta_0$","$\\beta_1$", "$\\sigma^2$")
+kable(aux2, col.names = colnames(suPoste$quantiles))
 ```
 ```{r}
+win.graph()
 plot(resPoste)
 ```
 
@@ -423,6 +428,8 @@ hdrPreciosPredic2013 <- hdr.den(preciosPredic2013, xlab = "Millones de COP",
                     ylab = "Densidad",
                     main = expression("Distribución predictiva del precio del modelo 2013"))
 ```
+
+\newpage
 ```{r}
 suP2013 <- summary(preciosPredic2013)
 kable(suP2013$statistics, col.names = colnames(suP2013$statistics))
